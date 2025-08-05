@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { Save, Download, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { ThemeToggle } from '~/components/themeToggle';
 
 interface ResumeEditorProps {
   initialData?: Resume;
@@ -75,27 +76,28 @@ export function ResumeEditor({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-black dark:via-gray-950 dark:to-black relative overflow-hidden">
       {/* 现代化背景装饰 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 via-purple-500/2 to-teal-500/3"></div>
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-blue-400/8 to-transparent rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-purple-400/8 to-transparent rounded-full blur-3xl"></div>
-      <div className="absolute top-1/3 right-1/3 w-[400px] h-[400px] bg-gradient-to-bl from-teal-400/6 to-transparent rounded-full blur-3xl"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 via-purple-500/2 to-teal-500/3 dark:from-blue-500/1 dark:via-purple-500/0.5 dark:to-teal-500/1"></div>
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-blue-400/8 to-transparent dark:from-blue-400/2 dark:to-transparent rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-purple-400/8 to-transparent dark:from-purple-400/2 dark:to-transparent rounded-full blur-3xl"></div>
+      <div className="absolute top-1/3 right-1/3 w-[400px] h-[400px] bg-gradient-to-bl from-teal-400/6 to-transparent dark:from-teal-400/1 dark:to-transparent rounded-full blur-3xl"></div>
 
       <div className="relative z-10">
         <div className="container mx-auto py-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-600 bg-clip-text text-transparent mb-3 drop-shadow-sm">
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-600 dark:from-indigo-400 dark:via-purple-400 dark:to-teal-400 bg-clip-text text-transparent mb-3 drop-shadow-sm">
                 简历编辑器
               </h1>
-              <p className="text-slate-600 text-lg font-medium">创建专业的简历，展现最好的自己</p>
+              <p className="text-slate-600 dark:text-slate-500 text-lg font-medium">创建专业的简历，展现最好的自己</p>
             </div>
             <div className="flex gap-4">
+              <ThemeToggle />
               <Button
                 variant="outline"
                 onClick={togglePreview}
-                className="flex items-center gap-2 bg-white/80 backdrop-blur-sm border-white/40 hover:bg-white/95 transition-all duration-300 shadow-lg hover:shadow-xl px-6 py-3 text-slate-700 font-medium"
+                className="flex items-center gap-2 bg-white/80 dark:bg-black/80 backdrop-blur-sm border-white/40 dark:border-gray-800/40 hover:bg-white/95 dark:hover:bg-gray-950/95 transition-all duration-300 shadow-lg hover:shadow-xl px-6 py-3 text-slate-700 dark:text-slate-400 font-medium"
               >
                 {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 {showPreview ? '隐藏预览' : '显示预览'}

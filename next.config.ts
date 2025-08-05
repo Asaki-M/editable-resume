@@ -1,6 +1,5 @@
 import type { NextConfig } from 'next';
 import withSerwistInit from '@serwist/next';
-import createNextIntlPlugin from 'next-intl/plugin';
 
 const revision = crypto.randomUUID();
 
@@ -11,8 +10,6 @@ const withSerwist = withSerwistInit({
   additionalPrecacheEntries: [{ url: '/~offline', revision }],
   disable: process.env.NODE_ENV === 'development',
 });
-
-const withNextIntl = createNextIntlPlugin('./lib/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -34,7 +31,7 @@ const nextConfig: NextConfig = {
       'react',
       'react-dom',
       'lucide-react',
-      'next-intl',
+
       'zustand',
       'sonner',
       'tailwind-merge',
@@ -78,4 +75,4 @@ const nextConfig: NextConfig = {
   ],
 };
 
-export default withSerwist(withNextIntl(nextConfig));
+export default withSerwist(nextConfig);
