@@ -694,3 +694,116 @@ html {
     transition: none;
   }
 }
+
+/* Resume specific styles */
+@layer components {
+  .resume-preview {
+    @apply bg-white text-gray-900 font-sans;
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+  }
+
+  .resume-preview h1 {
+    @apply text-3xl font-bold text-gray-900 mb-2;
+  }
+
+  .resume-preview h2 {
+    @apply text-xl font-bold text-gray-900 border-b border-gray-300 pb-2 mb-4;
+  }
+
+  .resume-preview h3 {
+    @apply text-lg font-semibold text-gray-900;
+  }
+
+  .resume-preview .contact-info {
+    @apply grid grid-cols-2 gap-4 text-sm text-gray-600;
+  }
+
+  .resume-preview .section {
+    @apply mb-6;
+  }
+
+  .resume-preview .experience-item,
+  .resume-preview .education-item,
+  .resume-preview .project-item {
+    @apply border-l-2 border-blue-200 pl-4 mb-4 relative;
+  }
+
+  .resume-preview .experience-item::before,
+  .resume-preview .education-item::before,
+  .resume-preview .project-item::before {
+    content: '';
+    @apply absolute -left-1 top-1 w-2 h-2 bg-blue-500 rounded-full;
+  }
+
+  .resume-preview .item-header {
+    @apply flex justify-between items-start mb-2;
+  }
+
+  .resume-preview .item-title {
+    @apply font-semibold text-gray-900;
+  }
+
+  .resume-preview .item-company {
+    @apply text-blue-600 font-medium;
+  }
+
+  .resume-preview .item-date {
+    @apply text-sm text-gray-600 text-right;
+  }
+
+  .resume-preview .item-description {
+    @apply text-gray-700 text-sm leading-relaxed;
+  }
+
+  .resume-preview .skills-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+
+  .resume-preview .skill-category {
+    @apply mb-4;
+  }
+
+  .resume-preview .skill-category-title {
+    @apply font-semibold text-gray-900 mb-2 flex items-center gap-2;
+  }
+
+  .resume-preview .skill-tags {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .resume-preview .skill-tag,
+  .resume-preview .tech-tag {
+    @apply bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs;
+  }
+
+  .resume-preview .two-column {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+  }
+
+  .resume-preview .cert-item,
+  .resume-preview .lang-item {
+    @apply mb-3 text-sm;
+  }
+
+  .resume-preview .cert-name,
+  .resume-preview .lang-name {
+    @apply font-semibold text-gray-900;
+  }
+
+  .resume-preview .cert-issuer {
+    @apply text-gray-600;
+  }
+
+  .resume-preview .cert-date {
+    @apply text-gray-500 text-xs;
+  }
+
+  .resume-preview .lang-item {
+    @apply flex justify-between items-center;
+  }
+
+  .resume-preview .lang-proficiency {
+    @apply bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs;
+  }
+}

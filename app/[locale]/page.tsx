@@ -81,9 +81,9 @@ export default function Home() {
               {/* CTA 按钮 */}
               <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Button size="lg" className="group liquid-glass-button-primary" asChild>
-                  <Link href="https://github.com/vadxq/nextjs-ai-starter/blob/main/README.md">
+                  <Link href="/resume">
                     <span className="flex items-center space-x-2">
-                      <span>{t('getStarted')}</span>
+                      <span>简历编辑器</span>
                       <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </span>
                   </Link>
@@ -166,16 +166,16 @@ export default function Home() {
 
               <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Button size="lg" className="group liquid-glass-button-primary" asChild>
-                  <Link href="/docs">
+                  <Link href="/resume">
                     <span className="flex items-center space-x-2">
                       <Rocket className="h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />
-                      <span>开始使用</span>
+                      <span>开始制作简历</span>
                     </span>
                   </Link>
                 </Button>
 
                 <Button variant="outline" size="lg" className="group liquid-glass-button-secondary" asChild>
-                  <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
+                  <Link href="https://github.com/vadxq/nextjs-ai-starter" target="_blank" rel="noopener noreferrer">
                     <span className="flex items-center space-x-2">
                       <Github className="h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />
                       <span>查看源码</span>
