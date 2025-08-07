@@ -78,6 +78,23 @@ export const LanguageSchema = z.object({
   proficiency: z.enum(['初级', '中级', '高级', '母语']),
 });
 
+// 模块顺序配置
+export const ModuleOrderSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  enabled: z.boolean().default(true),
+});
+
+// 简历版本配置
+export const ResumeVersionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  data: z.lazy(() => ResumeSchema),
+});
+
 // 完整简历数据结构
 export const ResumeSchema = z.object({
   personalInfo: PersonalInfoSchema,
@@ -87,6 +104,14 @@ export const ResumeSchema = z.object({
   projects: z.array(ProjectSchema).optional().default([]),
   certifications: z.array(CertificationSchema).optional().default([]),
   languages: z.array(LanguageSchema).optional().default([]),
+  moduleOrder: z.array(ModuleOrderSchema).default([
+    { id: 'workExperience', name: '工作经历', enabled: true },
+    { id: 'education', name: '教育背景', enabled: true },
+    { id: 'skills', name: '技能', enabled: true },
+    { id: 'projects', name: '项目经历', enabled: true },
+    { id: 'certifications', name: '证书', enabled: true },
+    { id: 'languages', name: '语言能力', enabled: true },
+  ]),
 });
 
 // TypeScript 类型
@@ -97,27 +122,9 @@ export type Skill = z.infer<typeof SkillSchema>;
 export type Project = z.infer<typeof ProjectSchema>;
 export type Certification = z.infer<typeof CertificationSchema>;
 export type Language = z.infer<typeof LanguageSchema>;
+export type ModuleOrder = z.infer<typeof ModuleOrderSchema>;
+export type ResumeVersion = z.infer<typeof ResumeVersionSchema>;
 export type Resume = z.infer<typeof ResumeSchema>;
-
-// 默认简历数据
-export const defaultResumeData: Resume = {
-  personalInfo: {
-    fullName: '',
-    email: '',
-    phone: '',
-    location: '',
-    website: '',
-    linkedin: '',
-    github: '',
-    summary: '',
-  },
-  workExperience: [],
-  education: [],
-  skills: [],
-  projects: [],
-  certifications: [],
-  languages: [],
-};
 
 // 生成唯一ID的工具函数
 export const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -187,3 +194,41 @@ export const createNewLanguage = (): Language => ({
   language: '',
   proficiency: '中级',
 });
+
+// 创建新的简历版本
+export const createNewResumeVersion = (name: string, data: Resume, description?: string): ResumeVersion => ({
+  id: generateId(),
+  name,
+  description: description || '',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  data,
+});
+
+// 默认简历数据
+export const defaultResumeData: Resume = {
+  personalInfo: {
+    fullName: '',
+    email: '',
+    phone: '',
+    location: '',
+    summary: '',
+    website: '',
+    linkedin: '',
+    github: '',
+  },
+  workExperience: [],
+  education: [],
+  skills: [],
+  projects: [],
+  certifications: [],
+  languages: [],
+  moduleOrder: [
+    { id: 'workExperience', name: '工作经历', enabled: true },
+    { id: 'education', name: '教育背景', enabled: true },
+    { id: 'skills', name: '技能', enabled: true },
+    { id: 'projects', name: '项目经历', enabled: true },
+    { id: 'certifications', name: '证书', enabled: true },
+    { id: 'languages', name: '语言能力', enabled: true },
+  ],
+};

@@ -9,7 +9,7 @@ import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, Trash2, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
 interface ProjectsFormProps {
@@ -17,9 +17,15 @@ interface ProjectsFormProps {
 }
 
 export function ProjectsForm({ form }: ProjectsFormProps) {
-  const { register, control, watch, setValue, formState: { errors } } = form;
-  
-  const { fields, append, remove } = useFieldArray({
+  const {
+    register,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = form;
+
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'projects',
   });
@@ -38,12 +44,24 @@ export function ProjectsForm({ form }: ProjectsFormProps) {
     }
   };
 
+  const moveUp = (index: number) => {
+    if (index > 0) {
+      move(index, index - 1);
+    }
+  };
+
+  const moveDown = (index: number) => {
+    if (index < fields.length - 1) {
+      move(index, index + 1);
+    }
+  };
+
   const addTechnology = (projectIndex: number, technology: string) => {
     if (!technology.trim()) return;
-    
+
     const currentTechnologies = watchedProjects?.[projectIndex]?.technologies || [];
     setValue(`projects.${projectIndex}.technologies`, [...currentTechnologies, technology.trim()]);
-    
+
     const newTechCopy = [...newTechnologies];
     newTechCopy[projectIndex] = '';
     setNewTechnologies(newTechCopy);
@@ -72,12 +90,8 @@ export function ProjectsForm({ form }: ProjectsFormProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">项目经历</h3>
-        <Button
-          type="button"
-          onClick={addProject}
-          className="flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
+        <Button type="button" onClick={addProject} className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
           添加项目
         </Button>
       </div>
@@ -85,9 +99,7 @@ export function ProjectsForm({ form }: ProjectsFormProps) {
       {fields.length === 0 && (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-center text-gray-500">
-              暂无项目经历，点击上方按钮添加
-            </p>
+            <p className="text-center text-gray-500">暂无项目经历，点击上方按钮添加</p>
           </CardContent>
         </Card>
       )}
@@ -95,72 +107,59 @@ export function ProjectsForm({ form }: ProjectsFormProps) {
       {fields.map((field, index) => (
         <Card key={field.id}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-base">
-              项目 {index + 1}
-            </CardTitle>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => remove(index)}
-              className="bg-white/80 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            <CardTitle className="text-base">项目 {index + 1}</CardTitle>
+            <div className="flex gap-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => moveUp(index)}
+                disabled={index === 0}
+                className="h-8 w-8 border-gray-200 bg-white/80 p-0 text-gray-600 hover:bg-gray-50 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50">
+                <ChevronUp className="h-3 w-3" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => moveDown(index)}
+                disabled={index === fields.length - 1}
+                className="h-8 w-8 border-gray-200 bg-white/80 p-0 text-gray-600 hover:bg-gray-50 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50">
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => remove(index)}
+                className="h-8 w-8 border-red-200 bg-white/80 p-0 text-red-600 transition-all hover:border-red-300 hover:bg-red-50 hover:text-red-700">
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor={`name-${index}`}>项目名称 *</Label>
-              <Input
-                id={`name-${index}`}
-                {...register(`projects.${index}.name`)}
-                placeholder="项目名称"
-              />
-              {errors.projects?.[index]?.name && (
-                <p className="text-sm text-red-600">
-                  {errors.projects[index]?.name?.message}
-                </p>
-              )}
+              <Input id={`name-${index}`} {...register(`projects.${index}.name`)} placeholder="项目名称" />
+              {errors.projects?.[index]?.name && <p className="text-sm text-red-600">{errors.projects[index]?.name?.message}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor={`description-${index}`}>项目描述 *</Label>
-              <Textarea
-                id={`description-${index}`}
-                {...register(`projects.${index}.description`)}
-                placeholder="描述项目的目标、功能和您的贡献..."
-                rows={3}
-              />
-              {errors.projects?.[index]?.description && (
-                <p className="text-sm text-red-600">
-                  {errors.projects[index]?.description?.message}
-                </p>
-              )}
+              <Textarea id={`description-${index}`} {...register(`projects.${index}.description`)} placeholder="描述项目的目标、功能和您的贡献..." rows={3} />
+              {errors.projects?.[index]?.description && <p className="text-sm text-red-600">{errors.projects[index]?.description?.message}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor={`startDate-${index}`}>开始日期 *</Label>
-                <Input
-                  id={`startDate-${index}`}
-                  type="month"
-                  {...register(`projects.${index}.startDate`)}
-                />
-                {errors.projects?.[index]?.startDate && (
-                  <p className="text-sm text-red-600">
-                    {errors.projects[index]?.startDate?.message}
-                  </p>
-                )}
+                <Input id={`startDate-${index}`} type="month" {...register(`projects.${index}.startDate`)} />
+                {errors.projects?.[index]?.startDate && <p className="text-sm text-red-600">{errors.projects[index]?.startDate?.message}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor={`endDate-${index}`}>结束日期</Label>
-                <Input
-                  id={`endDate-${index}`}
-                  type="month"
-                  {...register(`projects.${index}.endDate`)}
-                  disabled={watchedProjects?.[index]?.current}
-                />
+                <Input id={`endDate-${index}`} type="month" {...register(`projects.${index}.endDate`)} disabled={watchedProjects?.[index]?.current} />
               </div>
             </div>
 
@@ -168,9 +167,7 @@ export function ProjectsForm({ form }: ProjectsFormProps) {
               <Checkbox
                 id={`current-${index}`}
                 checked={watchedProjects?.[index]?.current || false}
-                onCheckedChange={(checked) => 
-                  handleCurrentChange(index, checked as boolean)
-                }
+                onCheckedChange={(checked) => handleCurrentChange(index, checked as boolean)}
               />
               <Label htmlFor={`current-${index}`}>正在进行</Label>
             </div>
@@ -178,22 +175,12 @@ export function ProjectsForm({ form }: ProjectsFormProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor={`url-${index}`}>项目链接</Label>
-                <Input
-                  id={`url-${index}`}
-                  type="url"
-                  {...register(`projects.${index}.url`)}
-                  placeholder="https://project-demo.com"
-                />
+                <Input id={`url-${index}`} type="url" {...register(`projects.${index}.url`)} placeholder="https://project-demo.com" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor={`github-${index}`}>GitHub 链接</Label>
-                <Input
-                  id={`github-${index}`}
-                  type="url"
-                  {...register(`projects.${index}.github`)}
-                  placeholder="https://github.com/username/project"
-                />
+                <Input id={`github-${index}`} type="url" {...register(`projects.${index}.github`)} placeholder="https://github.com/username/project" />
               </div>
             </div>
 
@@ -206,25 +193,20 @@ export function ProjectsForm({ form }: ProjectsFormProps) {
                   onChange={(e) => handleNewTechChange(index, e.target.value)}
                   onKeyPress={(e) => handleKeyPress(e, index)}
                 />
-                <Button
-                  type="button"
-                  onClick={() => addTechnology(index, newTechnologies[index] || '')}
-                  size="sm"
-                >
+                <Button type="button" onClick={() => addTechnology(index, newTechnologies[index] || '')} size="sm">
                   添加
                 </Button>
               </div>
-              
-              <div className="flex flex-wrap gap-2 mt-2">
+
+              <div className="mt-2 flex flex-wrap gap-2">
                 {watchedProjects?.[index]?.technologies?.map((tech, techIndex) => (
                   <Badge key={techIndex} variant="secondary" className="flex items-center gap-1">
                     {tech}
                     <button
                       type="button"
                       onClick={() => removeTechnology(index, techIndex)}
-                      className="ml-1 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-full p-0.5 transition-all"
-                    >
-                      <X className="w-3 h-3" />
+                      className="ml-1 rounded-full p-0.5 text-slate-500 transition-all hover:bg-red-50 hover:text-red-600">
+                      <X className="h-3 w-3" />
                     </button>
                   </Badge>
                 ))}

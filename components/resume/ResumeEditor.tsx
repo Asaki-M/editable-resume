@@ -11,11 +11,12 @@ import { SkillsForm } from './forms/SkillsForm';
 import { ProjectsForm } from './forms/ProjectsForm';
 import { CertificationsForm } from './forms/CertificationsForm';
 import { LanguagesForm } from './forms/LanguagesForm';
+import { ModuleOrderForm } from './ModuleOrderForm';
+import { VersionManager } from './VersionManager';
 import { ResumePreview } from './ResumePreview';
 import { Button } from '~/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-import { Save, Download, Eye, EyeOff } from 'lucide-react';
+import { Save, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { ThemeToggle } from '~/components/themeToggle';
 
@@ -25,12 +26,7 @@ interface ResumeEditorProps {
   onExportPDF?: (data: Resume) => void;
 }
 
-export function ResumeEditor({ 
-  initialData = defaultResumeData, 
-  onSave, 
-  onExportPDF 
-}: ResumeEditorProps) {
-  const [showPreview, setShowPreview] = useState(false);
+export function ResumeEditor({ initialData = defaultResumeData, onSave, onExportPDF }: ResumeEditorProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const form = useForm<Resume>({
@@ -39,7 +35,11 @@ export function ResumeEditor({
     mode: 'onChange',
   });
 
-  const { handleSubmit, watch, formState: { errors, isDirty } } = form;
+  const {
+    handleSubmit,
+    watch,
+    formState: { errors, isDirty },
+  } = form;
 
   const watchedData = watch();
 
@@ -71,147 +71,187 @@ export function ResumeEditor({
     }
   };
 
-  const togglePreview = () => {
-    setShowPreview(!showPreview);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-black dark:via-gray-950 dark:to-black relative overflow-hidden">
-      {/* 现代化背景装饰 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 via-purple-500/2 to-teal-500/3 dark:from-blue-500/1 dark:via-purple-500/0.5 dark:to-teal-500/1"></div>
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-blue-400/8 to-transparent dark:from-blue-400/2 dark:to-transparent rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-purple-400/8 to-transparent dark:from-purple-400/2 dark:to-transparent rounded-full blur-3xl"></div>
-      <div className="absolute top-1/3 right-1/3 w-[400px] h-[400px] bg-gradient-to-bl from-teal-400/6 to-transparent dark:from-teal-400/1 dark:to-transparent rounded-full blur-3xl"></div>
-
-      <div className="relative z-10">
-        <div className="container mx-auto py-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-600 dark:from-indigo-400 dark:via-purple-400 dark:to-teal-400 bg-clip-text text-transparent mb-3 drop-shadow-sm">
-                简历编辑器
-              </h1>
-              <p className="text-slate-600 dark:text-slate-500 text-lg font-medium">创建专业的简历，展现最好的自己</p>
+    <div className="flex min-h-screen bg-gray-900 dark:bg-gray-900">
+      {/* 左侧编辑面板 */}
+      <div className="sticky top-0 flex h-screen w-1/2 flex-col border-r border-gray-700 bg-gray-900 dark:border-gray-700 dark:bg-gray-900">
+        {/* 顶部工具栏 */}
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-700 bg-gray-900 p-4 dark:border-gray-700 dark:bg-gray-900">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded bg-blue-600 dark:bg-blue-600">
+              <span className="text-sm font-bold text-white">Rx</span>
             </div>
-            <div className="flex gap-4">
-              <ThemeToggle />
-              <Button
-                variant="outline"
-                onClick={togglePreview}
-                className="flex items-center gap-2 bg-white/80 dark:bg-black/80 backdrop-blur-sm border-white/40 dark:border-gray-800/40 hover:bg-white/95 dark:hover:bg-gray-950/95 transition-all duration-300 shadow-lg hover:shadow-xl px-6 py-3 text-slate-700 dark:text-slate-400 font-medium"
-              >
-                {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                {showPreview ? '隐藏预览' : '显示预览'}
-              </Button>
-              <Button
-                onClick={handleSubmit(onSubmit as any)}
-                disabled={!isDirty}
-                className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 hover:from-indigo-600 hover:via-purple-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-3 font-medium"
-              >
-                <Save className="w-4 h-4" />
-                保存
-              </Button>
-              <Button
-                onClick={handleExportPDF}
-                disabled={isExporting || !form.formState.isValid}
-                className="flex items-center gap-2 bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-600 hover:from-teal-600 hover:via-cyan-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-3 font-medium"
-              >
-                <Download className="w-4 h-4" />
-                {isExporting ? '导出中...' : '导出 PDF'}
-              </Button>
-            </div>
-        </div>
-
-        <div className={`grid ${showPreview ? 'grid-cols-2' : 'grid-cols-1'} gap-8`}>
-            <div className="space-y-6">
-              <Card className="bg-gradient-to-br from-white/90 via-indigo-50/30 to-white/90 backdrop-blur-sm border-white/40 shadow-2xl rounded-3xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-indigo-50/80 via-purple-50/50 to-teal-50/80 border-b border-white/30 backdrop-blur-sm">
-                  <CardTitle className="text-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-teal-600 bg-clip-text text-transparent font-bold">
-                    编辑简历
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-8">
-                  <Tabs defaultValue="personal" className="w-full">
-                    <TabsList className="grid w-full grid-cols-7 bg-gradient-to-r from-indigo-100/80 via-purple-100/60 to-teal-100/80 backdrop-blur-sm p-2 rounded-2xl shadow-inner">
-                      <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-indigo-600 font-medium rounded-xl transition-all duration-300">个人信息</TabsTrigger>
-                      <TabsTrigger value="work" className="data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-indigo-600 font-medium rounded-xl transition-all duration-300">工作经历</TabsTrigger>
-                      <TabsTrigger value="education" className="data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-indigo-600 font-medium rounded-xl transition-all duration-300">教育背景</TabsTrigger>
-                      <TabsTrigger value="skills" className="data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-indigo-600 font-medium rounded-xl transition-all duration-300">技能</TabsTrigger>
-                      <TabsTrigger value="projects" className="data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-indigo-600 font-medium rounded-xl transition-all duration-300">项目</TabsTrigger>
-                      <TabsTrigger value="certifications" className="data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-indigo-600 font-medium rounded-xl transition-all duration-300">证书</TabsTrigger>
-                      <TabsTrigger value="languages" className="data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-indigo-600 font-medium rounded-xl transition-all duration-300">语言</TabsTrigger>
-                    </TabsList>
-
-                <TabsContent value="personal" className="space-y-4">
-                  <PersonalInfoForm form={form as any} />
-                </TabsContent>
-
-                <TabsContent value="work" className="space-y-4">
-                  <WorkExperienceForm form={form as any} />
-                </TabsContent>
-
-                <TabsContent value="education" className="space-y-4">
-                  <EducationForm form={form as any} />
-                </TabsContent>
-
-                <TabsContent value="skills" className="space-y-4">
-                  <SkillsForm form={form as any} />
-                </TabsContent>
-
-                <TabsContent value="projects" className="space-y-4">
-                  <ProjectsForm form={form as any} />
-                </TabsContent>
-
-                <TabsContent value="certifications" className="space-y-4">
-                  <CertificationsForm form={form as any} />
-                </TabsContent>
-
-                <TabsContent value="languages" className="space-y-4">
-                  <LanguagesForm form={form as any} />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
-
-          {showPreview && (
-            <div className="space-y-6">
-              <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50 shadow-xl">
-                <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200/50">
-                  <CardTitle className="text-xl bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                    简历预览
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <ResumePreview data={watchedData} />
-                </CardContent>
-              </Card>
-            </div>
-          )}
-      </div>
-
-        {/* 显示表单错误 */}
-        {Object.keys(errors).length > 0 && (
-          <div className="mt-6 p-6 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200/50 rounded-xl shadow-sm backdrop-blur-sm">
-            <h3 className="text-red-800 font-semibold mb-3 flex items-center gap-2">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
-              </svg>
-              请修正以下错误：
-            </h3>
-            <ul className="text-red-700 space-y-2">
-              {Object.entries(errors).map(([key, error]) => (
-                <li key={key} className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span className="text-sm">
-                    <span className="font-medium">{key}:</span> {error?.message || '输入有误'}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <h1 className="text-lg font-semibold text-white dark:text-white">简历编辑器</h1>
           </div>
-        )}
+          <div className="flex gap-2">
+            <ThemeToggle />
+            <Button
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onClick={handleSubmit(onSubmit as any)}
+              disabled={!isDirty}
+              size="sm"
+              className="h-7 bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700">
+              <Save className="mr-1 h-3 w-3" />
+              保存
+            </Button>
+            <Button
+              onClick={handleExportPDF}
+              disabled={isExporting || !form.formState.isValid}
+              size="sm"
+              className="h-7 bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
+              <Download className="mr-1 h-3 w-3" />
+              {isExporting ? '导出中...' : 'PDF'}
+            </Button>
+          </div>
+        </div>
+
+        {/* 编辑内容区域 */}
+        <div
+          className="min-h-0 flex-1 overflow-y-auto p-4"
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#4B5563 #1F2937',
+          }}>
+          <Tabs defaultValue="personal" className="w-full">
+            <TabsList className="mb-6 grid w-full grid-cols-9 rounded-lg bg-gray-800 p-1 dark:bg-gray-800">
+              <TabsTrigger
+                value="personal"
+                className="rounded py-2 text-xs text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white dark:text-gray-400 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white">
+                基础
+              </TabsTrigger>
+              <TabsTrigger
+                value="work"
+                className="rounded py-2 text-xs text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white dark:text-gray-400 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white">
+                工作
+              </TabsTrigger>
+              <TabsTrigger
+                value="education"
+                className="rounded py-2 text-xs text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white dark:text-gray-400 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white">
+                教育
+              </TabsTrigger>
+              <TabsTrigger
+                value="skills"
+                className="rounded py-2 text-xs text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white dark:text-gray-400 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white">
+                技能
+              </TabsTrigger>
+              <TabsTrigger
+                value="projects"
+                className="rounded py-2 text-xs text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white dark:text-gray-400 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white">
+                项目
+              </TabsTrigger>
+              <TabsTrigger
+                value="certifications"
+                className="rounded py-2 text-xs text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white dark:text-gray-400 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white">
+                证书
+              </TabsTrigger>
+              <TabsTrigger
+                value="languages"
+                className="rounded py-2 text-xs text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white dark:text-gray-400 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white">
+                语言
+              </TabsTrigger>
+              <TabsTrigger
+                value="moduleOrder"
+                className="rounded py-2 text-xs text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white dark:text-gray-400 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white">
+                排序
+              </TabsTrigger>
+              <TabsTrigger
+                value="versions"
+                className="rounded py-2 text-xs text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white dark:text-gray-400 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white">
+                版本
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="personal" className="space-y-4">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <PersonalInfoForm form={form as any} />
+            </TabsContent>
+
+            <TabsContent value="work" className="space-y-4">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <WorkExperienceForm form={form as any} />
+            </TabsContent>
+
+            <TabsContent value="education" className="space-y-4">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <EducationForm form={form as any} />
+            </TabsContent>
+
+            <TabsContent value="skills" className="space-y-4">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <SkillsForm form={form as any} />
+            </TabsContent>
+
+            <TabsContent value="projects" className="space-y-4">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <ProjectsForm form={form as any} />
+            </TabsContent>
+
+            <TabsContent value="certifications" className="space-y-4">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <CertificationsForm form={form as any} />
+            </TabsContent>
+
+            <TabsContent value="languages" className="space-y-4">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <LanguagesForm form={form as any} />
+            </TabsContent>
+
+            <TabsContent value="moduleOrder" className="space-y-4">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <ModuleOrderForm form={form as any} />
+            </TabsContent>
+
+            <TabsContent value="versions" className="space-y-4">
+              <VersionManager
+                currentData={watchedData}
+                onLoadVersion={(data) => {
+                  form.reset(data);
+                  toast.success('版本已加载');
+                }}
+                onSaveVersion={(version) => {
+                  toast.success(`版本 "${version.name}" 已保存`);
+                }}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
+
+      {/* 右侧预览面板 */}
+      <div className="flex w-1/2 flex-col bg-white dark:bg-gray-800">
+        {/* 预览头部 */}
+        <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">简历预览</h2>
+          <div className="text-sm text-gray-500 dark:text-gray-400">实时预览</div>
+        </div>
+
+        {/* 预览内容 */}
+        <div className="flex-1 overflow-y-auto bg-white p-6 dark:bg-gray-800">
+          <ResumePreview data={watchedData} />
+        </div>
+      </div>
+
+      {/* 表单错误提示 - 固定在左侧底部 */}
+      {Object.keys(errors).length > 0 && (
+        <div className="absolute right-1/2 bottom-4 left-4 mr-4 rounded-lg border border-red-700 bg-red-900/90 p-4 shadow-lg backdrop-blur-sm">
+          <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-red-300">
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            请修正以下错误：
+          </h3>
+          <ul className="space-y-1 text-xs text-red-200">
+            {Object.entries(errors).map(([key, error]) => (
+              <li key={key} className="flex items-start gap-2">
+                <div className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-red-400"></div>
+                <span>
+                  <span className="font-medium">{key}:</span> {error?.message || '输入有误'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
