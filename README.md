@@ -1,8 +1,8 @@
-# Next.js AI Starter 项目技术文档
+# Editable Resume Builder
 
 ## 📋 项目概览
 
-**Next.js AI Starter** 是一个现代化的 Web 开发模板，集成了 AI 功能、国际化支持、PWA 能力和前沿 UI 设计。专为追求高效开发和现代化体验的开发者设计。
+**Editable Resume Builder** 是一个现代化的在线简历编辑器，支持实时预览和PDF导出功能。基于 Next.js 构建，提供专业的简历制作体验。
 
 ### 🎯 项目特色
 
@@ -450,6 +450,40 @@ chore: 构建过程或辅助工具的变动
 - [GitHub Repository](https://github.com/vadxq/nextjs-ai-starter)
 - [讨论区](https://github.com/vadxq/nextjs-ai-starter/discussions)
 - [问题反馈](https://github.com/vadxq/nextjs-ai-starter/issues)
+
+---
+
+## 🚀 部署指南
+
+### Vercel 部署
+
+1. **推送代码到 GitHub**
+2. **连接 Vercel**
+   - 访问 [Vercel](https://vercel.com)
+   - 导入你的 GitHub 仓库
+3. **环境变量配置**
+   - 无需额外配置，Puppeteer 会自动处理
+4. **部署完成**
+   - Vercel 会自动安装 Chrome 并处理 PDF 导出
+
+### 本地开发
+
+```bash
+# 安装依赖
+pnpm install
+
+# 安装 Chrome (仅首次需要)
+npx puppeteer browsers install chrome
+
+# 启动开发服务器
+pnpm dev
+```
+
+### PDF 导出功能
+
+- ✅ **本地开发**: 自动检测系统 Chrome 或使用 Puppeteer Chrome
+- ✅ **Vercel 部署**: 自动使用 Puppeteer 内置 Chrome
+- ✅ **跨平台支持**: Windows、macOS、Linux 全平台兼容
 
 ---
 

@@ -5,10 +5,12 @@ import { Resume } from '~/lib/types/resume';
 export async function POST(request: NextRequest) {
   try {
     const resumeData: Resume = await request.json();
+    console.log('PDF export request received for:', resumeData.personalInfo.fullName || 'Unknown User');
 
-    // 启动无头浏览器
+    // 启动无头浏览器 - 简化版本，支持多平台部署
     const browser = await puppeteer.launch({
       headless: true,
+      timeout: 60000,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -17,9 +19,16 @@ export async function POST(request: NextRequest) {
         '--no-first-run',
         '--no-zygote',
         '--single-process',
-        '--disable-gpu'
-      ]
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+      ],
     });
+
+    console.log('Successfully launched browser');
 
     const page = await browser.newPage();
 
@@ -30,10 +39,13 @@ export async function POST(request: NextRequest) {
     const html = generateResumeHTML(resumeData);
 
     // 设置页面内容
-    await page.setContent(html, { 
+    await page.setContent(html, {
       waitUntil: 'networkidle0',
-      timeout: 30000 
+      timeout: 30000,
     });
+
+    // 等待页面完全渲染
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // 生成 PDF
     const pdf = await page.pdf({
@@ -43,8 +55,8 @@ export async function POST(request: NextRequest) {
         top: '20mm',
         right: '15mm',
         bottom: '20mm',
-        left: '15mm'
-      }
+        left: '15mm',
+      },
     });
 
     await browser.close();
@@ -56,11 +68,25 @@ export async function POST(request: NextRequest) {
         'Content-Disposition': `attachment; filename="${resumeData.personalInfo.fullName || 'resume'}.pdf"`,
       },
     });
-
   } catch (error) {
     console.error('PDF generation error:', error);
+
+    // 检查是否是Chrome未安装的错误
+    if (error instanceof Error && error.message.includes('Could not find Chrome')) {
+      return NextResponse.json(
+        {
+          error: 'Chrome browser not found. Please run: npx puppeteer browsers install chrome',
+          details: error.message,
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to generate PDF' },
+      {
+        error: 'Failed to generate PDF',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
@@ -92,63 +118,61 @@ function generateResumeHTML(data: Resume): string {
         body {
           font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
           line-height: 1.6;
-          color: #334155;
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          color: #374151;
+          background: white;
+        }
+
+        .text-wrap {
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          word-break: break-word;
+          overflow-wrap: break-word;
         }
 
         .resume {
           max-width: 210mm;
           margin: 0 auto;
-          padding: 25px;
+          padding: 20px;
           background: white;
-          border-radius: 16px;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         .header {
-          position: relative;
-          padding: 25px;
-          margin-bottom: 30px;
-          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-          border-radius: 12px;
-          border: 1px solid #e2e8f0;
+          margin-bottom: 20px;
+          padding-bottom: 20px;
+          border-bottom: 2px solid #e5e7eb;
         }
 
         .name {
-          font-size: 32px;
+          font-size: 24px;
           font-weight: bold;
-          background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+          color: #1f2937;
           margin-bottom: 15px;
         }
         
         .contact-info {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 20px;
-          font-size: 14px;
-          color: #64748b;
+          gap: 15px;
+          font-size: 12px;
+          color: #6b7280;
         }
 
         .contact-item {
           display: flex;
           align-items: center;
-          gap: 10px;
-          padding: 8px 12px;
-          background: rgba(255, 255, 255, 0.7);
-          border-radius: 8px;
-          border: 1px solid #e2e8f0;
+          gap: 6px;
         }
 
         .summary {
-          margin-top: 20px;
-          padding: 16px;
-          background: rgba(255, 255, 255, 0.8);
-          border-radius: 10px;
-          border: 1px solid #e2e8f0;
-          color: #475569;
-          line-height: 1.7;
+          margin-top: 15px;
+          padding: 12px 0;
+          color: #4b5563;
+          line-height: 1.6;
+          font-size: 13px;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          word-break: break-word;
+          overflow-wrap: break-word;
         }
         
         .section {
@@ -156,61 +180,54 @@ function generateResumeHTML(data: Resume): string {
         }
         
         .section-title {
-          font-size: 18px;
-          font-weight: bold;
+          font-size: 16px;
+          font-weight: 600;
           color: #1f2937;
           border-bottom: 1px solid #d1d5db;
-          padding-bottom: 8px;
-          margin-bottom: 15px;
+          padding-bottom: 6px;
+          margin-bottom: 12px;
         }
         
         .experience-item, .education-item, .project-item {
-          border-left: 2px solid #e5e7eb;
-          padding-left: 15px;
-          margin-bottom: 20px;
-          position: relative;
-        }
-        
-        .experience-item::before, .education-item::before, .project-item::before {
-          content: '';
-          position: absolute;
-          left: -5px;
-          top: 5px;
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: #3b82f6;
+          border-left: 2px solid #d1d5db;
+          padding-left: 12px;
+          margin-bottom: 15px;
         }
         
         .item-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 8px;
+          margin-bottom: 6px;
         }
-        
+
         .item-title {
           font-weight: 600;
           color: #1f2937;
-          font-size: 16px;
+          font-size: 14px;
         }
-        
+
         .item-company {
-          color: #3b82f6;
+          color: #4b5563;
           font-weight: 500;
+          font-size: 13px;
         }
-        
+
         .item-date {
-          font-size: 12px;
+          font-size: 11px;
           color: #6b7280;
           text-align: right;
         }
-        
+
         .item-description {
           color: #4b5563;
-          font-size: 14px;
-          line-height: 1.6;
-          margin-bottom: 8px;
+          font-size: 12px;
+          line-height: 1.5;
+          margin-bottom: 6px;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          word-break: break-word;
+          overflow-wrap: break-word;
         }
         
         .skills-grid {
@@ -329,10 +346,14 @@ function generateResumeHTML(data: Resume): string {
         </div>
 
         <!-- 工作经历 -->
-        ${workExperience.length > 0 ? `
+        ${
+          workExperience.length > 0
+            ? `
           <div class="section">
             <h2 class="section-title">工作经历</h2>
-            ${workExperience.map(work => `
+            ${workExperience
+              .map(
+                (work) => `
               <div class="experience-item">
                 <div class="item-header">
                   <div>
@@ -345,21 +366,33 @@ function generateResumeHTML(data: Resume): string {
                   </div>
                 </div>
                 <div class="item-description">${work.description}</div>
-                ${work.achievements.length > 0 ? `
+                ${
+                  work.achievements.length > 0
+                    ? `
                   <ul style="margin-left: 20px; color: #6b7280; font-size: 13px;">
-                    ${work.achievements.map(achievement => `<li>${achievement}</li>`).join('')}
+                    ${work.achievements.map((achievement) => `<li>${achievement}</li>`).join('')}
                   </ul>
-                ` : ''}
+                `
+                    : ''
+                }
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <!-- 教育背景 -->
-        ${education.length > 0 ? `
+        ${
+          education.length > 0
+            ? `
           <div class="section">
             <h2 class="section-title">教育背景</h2>
-            ${education.map(edu => `
+            ${education
+              .map(
+                (edu) => `
               <div class="education-item">
                 <div class="item-header">
                   <div>
@@ -371,100 +404,156 @@ function generateResumeHTML(data: Resume): string {
                     📅 ${formatDate(edu.startDate)} - ${edu.current ? '至今' : formatDate(edu.endDate || '')}
                   </div>
                 </div>
-                ${edu.honors.length > 0 ? `
+                ${
+                  edu.honors.length > 0
+                    ? `
                   <div style="font-size: 13px; color: #6b7280;">荣誉: ${edu.honors.join(', ')}</div>
-                ` : ''}
+                `
+                    : ''
+                }
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <!-- 技能 -->
-        ${skills.length > 0 ? `
+        ${
+          skills.length > 0
+            ? `
           <div class="section">
             <h2 class="section-title">技能</h2>
             <div class="skills-grid">
-              ${skills.map(skillCategory => `
+              ${skills
+                .map(
+                  (skillCategory) => `
                 <div class="skill-category">
                   <div class="skill-category-title">
                     ${skillCategory.category}
                     <span class="skill-level">${skillCategory.level}</span>
                   </div>
                   <div class="skill-tags">
-                    ${skillCategory.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                    ${skillCategory.skills.map((skill) => `<span class="skill-tag">${skill}</span>`).join('')}
                   </div>
                 </div>
-              `).join('')}
+              `
+                )
+                .join('')}
             </div>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <!-- 项目经历 -->
-        ${projects.length > 0 ? `
+        ${
+          projects.length > 0
+            ? `
           <div class="section">
             <h2 class="section-title">项目经历</h2>
-            ${projects.map(project => `
+            ${projects
+              .map(
+                (project) => `
               <div class="project-item">
                 <div class="item-header">
                   <div>
                     <div class="item-title">${project.name}</div>
-                    ${(project.url || project.github) ? `
+                    ${
+                      project.url || project.github
+                        ? `
                       <div style="font-size: 12px; color: #3b82f6;">
                         ${project.url ? `🔗 ${project.url}` : ''}
                         ${project.github ? `💻 ${project.github}` : ''}
                       </div>
-                    ` : ''}
+                    `
+                        : ''
+                    }
                   </div>
                   <div class="item-date">
                     📅 ${formatDate(project.startDate)} - ${project.current ? '至今' : formatDate(project.endDate || '')}
                   </div>
                 </div>
                 <div class="item-description">${project.description}</div>
-                ${project.technologies.length > 0 ? `
+                ${
+                  project.technologies.length > 0
+                    ? `
                   <div class="tech-tags">
-                    ${project.technologies.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
+                    ${project.technologies.map((tech) => `<span class="tech-tag">${tech}</span>`).join('')}
                   </div>
-                ` : ''}
-                ${project.achievements.length > 0 ? `
+                `
+                    : ''
+                }
+                ${
+                  project.achievements.length > 0
+                    ? `
                   <ul style="margin-left: 20px; color: #6b7280; font-size: 13px;">
-                    ${project.achievements.map(achievement => `<li>${achievement}</li>`).join('')}
+                    ${project.achievements.map((achievement) => `<li>${achievement}</li>`).join('')}
                   </ul>
-                ` : ''}
+                `
+                    : ''
+                }
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <!-- 证书和语言 -->
-        ${(certifications.length > 0 || languages.length > 0) ? `
+        ${
+          certifications.length > 0 || languages.length > 0
+            ? `
           <div class="two-column">
-            ${certifications.length > 0 ? `
+            ${
+              certifications.length > 0
+                ? `
               <div class="section">
                 <h2 class="section-title">证书</h2>
-                ${certifications.map(cert => `
+                ${certifications
+                  .map(
+                    (cert) => `
                   <div class="cert-item">
                     <div class="cert-name">${cert.name}</div>
                     <div class="cert-issuer">${cert.issuer}</div>
                     <div class="cert-date">${formatDate(cert.date)}</div>
                     ${cert.url ? `<div style="font-size: 11px; color: #3b82f6;">${cert.url}</div>` : ''}
                   </div>
-                `).join('')}
+                `
+                  )
+                  .join('')}
               </div>
-            ` : ''}
+            `
+                : ''
+            }
 
-            ${languages.length > 0 ? `
+            ${
+              languages.length > 0
+                ? `
               <div class="section">
                 <h2 class="section-title">语言能力</h2>
-                ${languages.map(lang => `
+                ${languages
+                  .map(
+                    (lang) => `
                   <div class="lang-item">
                     <span class="lang-name">${lang.language}</span>
                     <span class="lang-proficiency">${lang.proficiency}</span>
                   </div>
-                `).join('')}
+                `
+                  )
+                  .join('')}
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     </body>
     </html>

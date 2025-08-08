@@ -1,21 +1,8 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import '~/styles/globals.css';
 import { Toaster } from '~/components/ui/sonner';
 import { ThemeProvider } from '~/components/provider/themeProvider';
 import { SWRProvider } from '~/components/provider/swrProvider';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-  display: 'swap',
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-  display: 'swap',
-});
 
 const THEME_COLORS = [
   { media: '(prefers-color-scheme: light)', color: 'white' },
@@ -43,11 +30,7 @@ export function generateViewport() {
   };
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
@@ -68,7 +51,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="antialiased">
         <ThemeProvider>
           <SWRProvider>
             {children}

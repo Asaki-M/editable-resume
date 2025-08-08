@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 }
 
 :root {
@@ -698,17 +698,17 @@ html {
 /* Resume specific styles */
 @layer components {
   .resume-preview {
-    @apply bg-white text-gray-900 font-sans;
+    @apply bg-white font-sans text-gray-900;
     font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
   }
 
   .resume-preview h1 {
-    @apply text-3xl font-bold text-gray-900 mb-2;
+    @apply mb-2 text-3xl font-bold text-gray-900;
   }
 
   .resume-preview h2 {
-    @apply text-xl font-bold text-gray-900 border-b border-gray-300 pb-2 mb-4;
+    @apply mb-4 border-b border-gray-300 pb-2 text-xl font-bold text-gray-900;
   }
 
   .resume-preview h3 {
@@ -726,18 +726,18 @@ html {
   .resume-preview .experience-item,
   .resume-preview .education-item,
   .resume-preview .project-item {
-    @apply border-l-2 border-blue-200 pl-4 mb-4 relative;
+    @apply relative mb-4 border-l-2 border-blue-200 pl-4;
   }
 
   .resume-preview .experience-item::before,
   .resume-preview .education-item::before,
   .resume-preview .project-item::before {
     content: '';
-    @apply absolute -left-1 top-1 w-2 h-2 bg-blue-500 rounded-full;
+    @apply absolute top-1 -left-1 h-2 w-2 rounded-full bg-blue-500;
   }
 
   .resume-preview .item-header {
-    @apply flex justify-between items-start mb-2;
+    @apply mb-2 flex items-start justify-between;
   }
 
   .resume-preview .item-title {
@@ -745,19 +745,19 @@ html {
   }
 
   .resume-preview .item-company {
-    @apply text-blue-600 font-medium;
+    @apply font-medium text-blue-600;
   }
 
   .resume-preview .item-date {
-    @apply text-sm text-gray-600 text-right;
+    @apply text-right text-sm text-gray-600;
   }
 
   .resume-preview .item-description {
-    @apply text-gray-700 text-sm leading-relaxed;
+    @apply text-sm leading-relaxed text-gray-700;
   }
 
   .resume-preview .skills-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+    @apply grid grid-cols-1 gap-4 md:grid-cols-2;
   }
 
   .resume-preview .skill-category {
@@ -765,7 +765,7 @@ html {
   }
 
   .resume-preview .skill-category-title {
-    @apply font-semibold text-gray-900 mb-2 flex items-center gap-2;
+    @apply mb-2 flex items-center gap-2 font-semibold text-gray-900;
   }
 
   .resume-preview .skill-tags {
@@ -774,11 +774,11 @@ html {
 
   .resume-preview .skill-tag,
   .resume-preview .tech-tag {
-    @apply bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs;
+    @apply rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-700;
   }
 
   .resume-preview .two-column {
-    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+    @apply grid grid-cols-1 gap-6 md:grid-cols-2;
   }
 
   .resume-preview .cert-item,
@@ -796,14 +796,14 @@ html {
   }
 
   .resume-preview .cert-date {
-    @apply text-gray-500 text-xs;
+    @apply text-xs text-gray-500;
   }
 
   .resume-preview .lang-item {
-    @apply flex justify-between items-center;
+    @apply flex items-center justify-between;
   }
 
   .resume-preview .lang-proficiency {
-    @apply bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs;
+    @apply rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600;
   }
 }
