@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Resume, ResumeSchema, defaultResumeData } from '~/lib/types/resume';
 import { PersonalInfoForm } from './forms/PersonalInfoForm';
@@ -23,14 +23,13 @@ import { ThemeToggle } from '~/components/themeToggle';
 interface ResumeEditorProps {
   initialData?: Resume;
   onSave?: (data: Resume) => void;
-  onExportPDF?: (data: Resume) => void;
 }
 
-export function ResumeEditor({ initialData = defaultResumeData, onSave, onExportPDF }: ResumeEditorProps) {
+export function ResumeEditor({ initialData = defaultResumeData, onSave }: ResumeEditorProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const form = useForm<Resume>({
-    resolver: zodResolver(ResumeSchema),
+    resolver: zodResolver(ResumeSchema) as Resolver<Resume, unknown>,
     defaultValues: initialData,
     mode: 'onChange',
   });
@@ -61,7 +60,40 @@ export function ResumeEditor({ initialData = defaultResumeData, onSave, onExport
 
     setIsExporting(true);
     try {
-      await onExportPDF?.(watchedData);
+      // Use Puppeteer-based PDF export that captures the actual ResumePreview component with styles
+      const response = await fetch('/api/export-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeData: watchedData,
+          mode: 'component', // Use component capture mode
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('PDF export failed');
+      }
+
+      // 获取 PDF blob
+      const blob = await response.blob();
+
+      // 创建下载链接
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `${watchedData.personalInfo.fullName || 'resume'}.pdf`;
+
+      // 触发下载
+      document.body.appendChild(a);
+      a.click();
+
+      // 清理
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
       toast.success('PDF 导出成功！');
     } catch (error) {
       console.error('PDF 导出失败:', error);
@@ -86,8 +118,7 @@ export function ResumeEditor({ initialData = defaultResumeData, onSave, onExport
           <div className="flex gap-2">
             <ThemeToggle />
             <Button
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onClick={handleSubmit(onSubmit as any)}
+              onClick={handleSubmit(onSubmit)}
               disabled={!isDirty}
               size="sm"
               className="h-7 bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700">
@@ -162,43 +193,35 @@ export function ResumeEditor({ initialData = defaultResumeData, onSave, onExport
             </TabsList>
 
             <TabsContent value="personal" className="space-y-4">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <PersonalInfoForm form={form as any} />
+              <PersonalInfoForm form={form} />
             </TabsContent>
 
             <TabsContent value="work" className="space-y-4">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <WorkExperienceForm form={form as any} />
+              <WorkExperienceForm form={form} />
             </TabsContent>
 
             <TabsContent value="education" className="space-y-4">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <EducationForm form={form as any} />
+              <EducationForm form={form} />
             </TabsContent>
 
             <TabsContent value="skills" className="space-y-4">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <SkillsForm form={form as any} />
+              <SkillsForm form={form} />
             </TabsContent>
 
             <TabsContent value="projects" className="space-y-4">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <ProjectsForm form={form as any} />
+              <ProjectsForm form={form} />
             </TabsContent>
 
             <TabsContent value="certifications" className="space-y-4">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <CertificationsForm form={form as any} />
+              <CertificationsForm form={form} />
             </TabsContent>
 
             <TabsContent value="languages" className="space-y-4">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <LanguagesForm form={form as any} />
+              <LanguagesForm form={form} />
             </TabsContent>
 
             <TabsContent value="moduleOrder" className="space-y-4">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <ModuleOrderForm form={form as any} />
+              <ModuleOrderForm form={form} />
             </TabsContent>
 
             <TabsContent value="versions" className="space-y-4">

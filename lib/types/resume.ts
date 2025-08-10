@@ -19,10 +19,10 @@ export const WorkExperienceSchema = z.object({
   position: z.string().min(1, '职位不能为空'),
   startDate: z.string().min(1, '开始日期不能为空'),
   endDate: z.string().optional(),
-  current: z.boolean().default(false),
+  current: z.boolean().optional().default(false),
   location: z.string().min(1, '工作地点不能为空'),
   description: z.string().min(10, '工作描述至少需要10个字符'),
-  achievements: z.array(z.string()).default([]),
+  achievements: z.array(z.string()).optional().default([]),
 });
 
 // 教育背景
@@ -33,9 +33,9 @@ export const EducationSchema = z.object({
   major: z.string().min(1, '专业不能为空'),
   startDate: z.string().min(1, '开始日期不能为空'),
   endDate: z.string().optional(),
-  current: z.boolean().default(false),
+  current: z.boolean().optional().default(false),
   gpa: z.string().optional(),
-  honors: z.array(z.string()).default([]),
+  honors: z.array(z.string()).optional().default([]),
 });
 
 // 技能
@@ -43,7 +43,7 @@ export const SkillSchema = z.object({
   id: z.string(),
   category: z.string().min(1, '技能分类不能为空'),
   skills: z.array(z.string().min(1, '技能名称不能为空')),
-  level: z.enum(['初级', '中级', '高级', '专家']).default('中级'),
+  level: z.enum(['初级', '中级', '高级', '专家']).optional().default('中级'),
 });
 
 // 项目经历
@@ -54,10 +54,10 @@ export const ProjectSchema = z.object({
   technologies: z.array(z.string()),
   startDate: z.string().min(1, '开始日期不能为空'),
   endDate: z.string().optional(),
-  current: z.boolean().default(false),
+  current: z.boolean().optional().default(false),
   url: z.string().url('请输入有效的项目地址').optional().or(z.literal('')),
   github: z.string().url('请输入有效的GitHub地址').optional().or(z.literal('')),
-  achievements: z.array(z.string()).default([]),
+  achievements: z.array(z.string()).optional().default([]),
 });
 
 // 证书
@@ -82,7 +82,7 @@ export const LanguageSchema = z.object({
 export const ModuleOrderSchema = z.object({
   id: z.string(),
   name: z.string(),
-  enabled: z.boolean().default(true),
+  enabled: z.boolean().optional().default(true),
 });
 
 // 简历版本配置
