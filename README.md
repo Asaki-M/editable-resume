@@ -62,59 +62,6 @@
 - **Puppeteer** - 无头浏览器，用于 PDF 生成
 - **Chrome DevTools Protocol** - 高质量渲染
 
-## 📁 项目结构
-
-```
-editable-resume/
-├── app/                          # Next.js 15 App Router
-│   ├── api/                     # API 路由
-│   │   ├── export-pdf/         # PDF 导出接口
-│   │   └── templates/          # 模板接口
-│   ├── globals.css             # 全局样式
-│   ├── layout.tsx              # 根布局
-│   └── page.tsx                # 首页
-├── components/                   # 组件目录
-│   ├── resume/                 # 简历相关组件
-│   │   ├── forms/             # 表单组件
-│   │   │   ├── PersonalInfoForm.tsx    # 个人信息表单
-│   │   │   ├── WorkExperienceForm.tsx  # 工作经历表单
-│   │   │   ├── EducationForm.tsx       # 教育背景表单
-│   │   │   ├── SkillsForm.tsx          # 技能表单
-│   │   │   ├── ProjectsForm.tsx        # 项目经历表单
-│   │   │   ├── CertificationsForm.tsx  # 证书表单
-│   │   │   └── LanguagesForm.tsx       # 语言表单
-│   │   ├── ResumeEditor.tsx    # 简历编辑器主组件
-│   │   ├── ResumePreview.tsx   # 简历预览组件
-│   │   ├── VersionManager.tsx  # 版本管理组件
-│   │   └── ModuleOrderForm.tsx # 模块排序组件
-│   ├── ui/                     # UI 基础组件
-│   │   ├── button.tsx          # 按钮组件
-│   │   ├── input.tsx           # 输入框组件
-│   │   ├── textarea.tsx        # 文本域组件
-│   │   ├── tabs.tsx            # 标签页组件
-│   │   ├── card.tsx            # 卡片组件
-│   │   └── ...                 # 其他 UI 组件
-│   └── layout/                 # 布局组件
-│       ├── header.tsx          # 导航头部
-│       └── footer.tsx          # 页脚
-├── lib/                         # 工具库
-│   ├── pdf-templates/          # PDF 模板
-│   │   ├── minimal.ts          # 极简模板
-│   │   ├── classic.ts          # 经典模板
-│   │   └── creative.ts         # 创意模板
-│   ├── types/                  # 类型定义
-│   │   └── resume.ts           # 简历数据类型
-│   └── utils.ts                # 工具函数
-├── public/                      # 静态资源
-│   ├── icons/                  # 图标文件
-│   └── images/                 # 图片文件
-└── 配置文件                      # 各种配置文件
-    ├── package.json            # 项目依赖
-    ├── tailwind.config.ts      # Tailwind 配置
-    ├── tsconfig.json           # TypeScript 配置
-    └── next.config.js          # Next.js 配置
-```
-
 ## 🎯 核心功能详解
 
 ### 1. 📝 简历编辑
@@ -169,18 +116,6 @@ editable-resume/
 - **设计理念**: 简洁清爽，突出内容
 - **适用场景**: 技术岗位、学术研究
 - **特色**: 黑白配色，清晰的层次结构
-
-#### 经典模板 (Classic)
-
-- **设计理念**: 传统商务风格
-- **适用场景**: 商务、管理岗位
-- **特色**: 稳重大方，专业感强
-
-#### 创意模板 (Creative)
-
-- **设计理念**: 现代化设计元素
-- **适用场景**: 设计、创意岗位
-- **特色**: 色彩丰富，视觉冲击力强
 
 ### 3. 📄 PDF 导出
 
@@ -454,107 +389,6 @@ export async function POST(request: Request) {
 }
 ```
 
-## � 部署指南
-
-### Vercel 部署 (推荐)
-
-1. **推送代码到 GitHub**
-
-```bash
-git add .
-git commit -m "feat: 初始化简历编辑器项目"
-git push origin main
-```
-
-2. **连接 Vercel**
-
-- 访问 [Vercel](https://vercel.com)
-- 点击 "New Project"
-- 导入你的 GitHub 仓库
-- 选择 "Next.js" 框架预设
-
-3. **配置设置**
-
-- **Framework Preset**: Next.js
-- **Root Directory**: `./`
-- **Build Command**: `pnpm build`
-- **Output Directory**: `.next`
-
-4. **环境变量配置**
-
-```env
-# 如果需要自定义配置
-NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
-```
-
-5. **部署完成**
-
-- Vercel 会自动安装 Chrome 并处理 PDF 导出
-- 支持自动部署，每次推送代码都会重新部署
-
-### 其他平台部署
-
-#### Netlify
-
-```bash
-# 构建命令
-npm run build
-
-# 发布目录
-.next
-```
-
-#### Railway
-
-```bash
-# 添加 railway.json
-{
-  "build": {
-    "builder": "NIXPACKS"
-  },
-  "deploy": {
-    "startCommand": "npm start"
-  }
-}
-```
-
-#### Docker 部署
-
-```dockerfile
-# Dockerfile
-FROM node:18-alpine
-
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-
-COPY . .
-RUN npm run build
-
-EXPOSE 3000
-CMD ["npm", "start"]
-```
-
-### 本地开发
-
-```bash
-# 安装依赖
-pnpm install
-
-# 安装 Chrome (仅首次需要)
-npx puppeteer browsers install chrome
-
-# 启动开发服务器
-pnpm dev
-```
-
-### PDF 导出功能说明
-
-- ✅ **本地开发**: 自动检测系统 Chrome 或使用 Puppeteer Chrome
-- ✅ **Vercel 部署**: 自动使用 Puppeteer 内置 Chrome
-- ✅ **跨平台支持**: Windows、macOS、Linux 全平台兼容
-- ✅ **无需配置**: 开箱即用，无需额外设置
-
 ## 📋 开发计划
 
 ### 🎯 已完成功能
@@ -579,35 +413,6 @@ pnpm dev
   - [x] 版本管理
   - [x] 模块排序
   - [x] 显示控制
-
-### 🚧 开发中功能
-
-- [ ] **模板扩展**
-  - [ ] 经典模板
-  - [ ] 创意模板
-  - [ ] 自定义模板编辑器
-
-- [ ] **功能增强**
-  - [ ] 数据导入导出 (JSON/PDF)
-  - [ ] 简历分享功能
-  - [ ] 打印优化
-
-### � 未来计划
-
-- [ ] **AI 功能**
-  - [ ] AI 简历优化建议
-  - [ ] 智能内容生成
-  - [ ] 关键词优化
-
-- [ ] **协作功能**
-  - [ ] 用户账户系统
-  - [ ] 云端同步
-  - [ ] 简历分享
-
-- [ ] **高级功能**
-  - [ ] 多语言简历
-  - [ ] 简历统计分析
-  - [ ] 求职跟踪
 
 ## 🤝 贡献指南
 
@@ -639,22 +444,6 @@ chore: 构建过程或辅助工具的变动
 3. 提交更改 (`git commit -m 'feat: Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 创建 Pull Request
-
-## 📚 相关资源
-
-### 技术文档
-
-- [Next.js 文档](https://nextjs.org/docs) - React 全栈框架
-- [Tailwind CSS 文档](https://tailwindcss.com/docs) - CSS 框架
-- [shadcn/ui 文档](https://ui.shadcn.com) - UI 组件库
-- [React Hook Form 文档](https://react-hook-form.com) - 表单处理
-- [Puppeteer 文档](https://pptr.dev) - PDF 生成
-
-### 社区资源
-
-- [GitHub Repository](https://github.com/Asaki-M/editable-resume)
-- [问题反馈](https://github.com/Asaki-M/editable-resume/issues)
-- [功能建议](https://github.com/Asaki-M/editable-resume/discussions)
 
 ## 📄 开源协议
 
