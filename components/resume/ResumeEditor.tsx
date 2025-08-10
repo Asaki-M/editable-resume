@@ -13,9 +13,11 @@ import { CertificationsForm } from './forms/CertificationsForm';
 import { LanguagesForm } from './forms/LanguagesForm';
 import { ModuleOrderForm } from './ModuleOrderForm';
 import { VersionManager } from './VersionManager';
+
 import { ResumePreview } from './ResumePreview';
 import { Button } from '~/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
+
 import { Save, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { ThemeToggle } from '~/components/themeToggle';
@@ -60,7 +62,6 @@ export function ResumeEditor({ initialData = defaultResumeData, onSave }: Resume
 
     setIsExporting(true);
     try {
-      // Use Puppeteer-based PDF export that captures the actual ResumePreview component with styles
       const response = await fetch('/api/export-pdf', {
         method: 'POST',
         headers: {
@@ -68,7 +69,7 @@ export function ResumeEditor({ initialData = defaultResumeData, onSave }: Resume
         },
         body: JSON.stringify({
           resumeData: watchedData,
-          mode: 'component', // Use component capture mode
+          template: 'minimal',
         }),
       });
 
@@ -121,7 +122,7 @@ export function ResumeEditor({ initialData = defaultResumeData, onSave }: Resume
               onClick={handleSubmit(onSubmit)}
               disabled={!isDirty}
               size="sm"
-              className="h-7 bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700">
+              className="h-9 bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700">
               <Save className="mr-1 h-3 w-3" />
               保存
             </Button>
@@ -129,7 +130,7 @@ export function ResumeEditor({ initialData = defaultResumeData, onSave }: Resume
               onClick={handleExportPDF}
               disabled={isExporting || !form.formState.isValid}
               size="sm"
-              className="h-7 bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
+              className="h-9 bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
               <Download className="mr-1 h-3 w-3" />
               {isExporting ? '导出中...' : 'PDF'}
             </Button>
