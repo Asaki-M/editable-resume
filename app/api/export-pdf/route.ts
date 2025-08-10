@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     // 返回 PDF
     const filename = sanitizeFilename(resumeData.personalInfo.fullName || 'resume');
 
-    return new NextResponse(pdf, {
+    return new NextResponse(Buffer.from(pdf), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${filename}.pdf"`,

@@ -25,9 +25,10 @@ import { ThemeToggle } from '~/components/themeToggle';
 interface ResumeEditorProps {
   initialData?: Resume;
   onSave?: (data: Resume) => void;
+  onExportPDF?: (data: Resume) => void;
 }
 
-export function ResumeEditor({ initialData = defaultResumeData, onSave }: ResumeEditorProps) {
+export function ResumeEditor({ initialData = defaultResumeData, onSave, onExportPDF }: ResumeEditorProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const form = useForm<Resume>({
@@ -62,6 +63,14 @@ export function ResumeEditor({ initialData = defaultResumeData, onSave }: Resume
 
     setIsExporting(true);
     try {
+      // 如果有传入的 onExportPDF 回调，使用它
+      if (onExportPDF) {
+        onExportPDF(watchedData);
+        toast.success('PDF 导出成功！');
+        return;
+      }
+
+      // 否则使用默认的导出逻辑
       const response = await fetch('/api/export-pdf', {
         method: 'POST',
         headers: {

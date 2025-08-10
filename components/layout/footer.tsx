@@ -1,6 +1,5 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Github, Twitter, Linkedin, Mail, Send, Zap, ArrowUp, Heart } from 'lucide-react';
@@ -8,7 +7,6 @@ import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 
 export default function Footer() {
-  const t = useTranslations();
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
 
@@ -27,39 +25,29 @@ export default function Footer() {
 
   const footerSections = [
     {
-      title: t('footer.project.title'),
+      title: '项目',
       links: [
-        { name: t('footer.project.github'), href: 'https://github.com/vadxq/nextjs-ai-starter', external: true },
-        { name: t('footer.project.documentation'), href: 'https://github.com/vadxq/nextjs-ai-starter/blob/main/README.md', external: true },
-        { name: t('footer.project.examples'), href: 'https://github.com/vadxq/nextjs-ai-starter', external: true },
-        { name: t('footer.project.changelog'), href: 'https://github.com/vadxq/nextjs-ai-starter/releases', external: true },
+        { name: 'GitHub', href: 'https://github.com/Asaki-M/editable-resume', external: true },
+        { name: '文档', href: 'https://github.com/Asaki-M/editable-resume/blob/main/README.md', external: true },
+        { name: '示例', href: 'https://github.com/Asaki-M/editable-resume', external: true },
+        { name: '更新日志', href: 'https://github.com/Asaki-M/editable-resume/releases', external: true },
       ],
     },
     {
-      title: t('footer.community.title'),
+      title: '社区',
       links: [
-        { name: t('footer.community.discussions'), href: 'https://github.com/vadxq/nextjs-ai-starter/discussions', external: true },
-        { name: t('footer.community.issues'), href: 'https://github.com/vadxq/nextjs-ai-starter/issues', external: true },
-        { name: t('footer.community.contributing'), href: 'https://github.com/vadxq/nextjs-ai-starter/blob/main/CONTRIBUTING.md', external: true },
-        { name: t('footer.community.discord'), href: 'https://discord.gg/vadxq', external: true },
+        { name: '讨论', href: 'https://github.com/Asaki-M/editable-resume/discussions', external: true },
+        { name: '问题反馈', href: 'https://github.com/Asaki-M/editable-resume/issues', external: true },
+        { name: '贡献指南', href: 'https://github.com/Asaki-M/editable-resume/blob/main/CONTRIBUTING.md', external: true },
       ],
     },
     {
-      title: t('footer.resources.title'),
+      title: '技术栈',
       links: [
-        { name: t('footer.resources.nextjs'), href: 'https://nextjs.org', external: true },
-        { name: t('footer.resources.tailwind'), href: 'https://tailwindcss.com', external: true },
-        { name: t('footer.resources.typescript'), href: 'https://typescriptlang.org', external: true },
-        { name: t('footer.resources.vercel'), href: 'https://vercel.com', external: true },
-      ],
-    },
-    {
-      title: t('footer.legal.title'),
-      links: [
-        { name: t('footer.legal.license'), href: 'https://github.com/vadxq/nextjs-ai-starter/blob/main/LICENSE', external: true },
-        { name: t('footer.legal.terms'), href: 'https://github.com/vadxq/nextjs-ai-starter/blob/main/TERMS.md', external: true },
-        { name: t('footer.legal.privacy'), href: 'https://github.com/vadxq/nextjs-ai-starter/blob/main/PRIVACY.md', external: true },
-        { name: t('footer.legal.security'), href: 'https://github.com/vadxq/nextjs-ai-starter/blob/main/SECURITY.md', external: true },
+        { name: 'Next.js', href: 'https://nextjs.org', external: true },
+        { name: 'Tailwind CSS', href: 'https://tailwindcss.com', external: true },
+        { name: 'TypeScript', href: 'https://typescriptlang.org', external: true },
+        { name: 'Vercel', href: 'https://vercel.com', external: true },
       ],
     },
   ];
@@ -93,27 +81,23 @@ export default function Footer() {
                       </div>
                       <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 opacity-30 blur-lg" />
                     </div>
-                    <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-2xl font-bold text-transparent dark:from-white dark:to-gray-300">
-                      {t('layout.title')}
-                    </span>
+                    <span className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-2xl font-bold text-transparent dark:from-white dark:to-gray-300">简历编辑器</span>
                   </div>
-                  <p className="max-w-md leading-relaxed text-gray-600 dark:text-gray-400">
-                    现代化的Next.js开发模板，集成AI功能、国际化支持、暗黑模式和最新UI组件。助力开发者快速构建生产级应用。
-                  </p>
+                  <p className="max-w-md leading-relaxed text-gray-600 dark:text-gray-400">现代化的在线简历编辑器，支持多种模板、实时预览、PDF导出。助力求职者快速制作专业简历。</p>
                 </div>
 
                 {/* 订阅区域 */}
                 <div className="space-y-4">
                   <div>
-                    <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{t('footer.newsletter.title')}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('footer.newsletter.description')}</p>
+                    <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">订阅更新</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">获取最新功能和模板更新通知</p>
                   </div>
 
                   <form onSubmit={handleSubscribe} className="flex space-x-2">
                     <div className="relative flex-1">
                       <Input
                         type="email"
-                        placeholder={t('footer.newsletter.placeholder')}
+                        placeholder="输入您的邮箱地址"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full border-white/20 bg-white/50 backdrop-blur-sm transition-all duration-300 focus:bg-white/80 dark:border-white/10 dark:bg-white/5 dark:focus:bg-white/10"
@@ -165,11 +149,12 @@ export default function Footer() {
             <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
               {/* 版权信息 */}
               <div className="flex flex-col items-center space-y-2 text-sm text-gray-600 md:flex-row md:space-y-0 md:space-x-6 dark:text-gray-400">
-                <p>{t('footer.copyright')}</p>
+                <p>© 2024 简历编辑器. 保留所有权利.</p>
                 <div className="hidden h-1 w-1 rounded-full bg-gray-400 md:block" />
                 <p className="flex items-center space-x-1">
-                  <span>{t('footer.poweredBy')}</span>
+                  <span>用</span>
                   <Heart className="h-3 w-3 text-red-500" />
+                  <span>制作</span>
                 </p>
               </div>
 
