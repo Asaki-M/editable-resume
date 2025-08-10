@@ -39,58 +39,100 @@ export async function POST(request: NextRequest) {
       // 如果本地 Chrome 不可用，尝试使用 chromium（生产环境）
       try {
         executablePath = await chromium.executablePath();
-        args = chromium.args;
-        console.log('Using chromium executable');
-      } catch {
+        args = [
+          ...chromium.args,
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--single-process',
+          '--no-zygote',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+        ];
+        console.log('Using chromium executable for production');
+      } catch (error) {
+        console.error('Chromium setup error:', error);
         throw new Error('No Chrome executable found. Please install Chrome or set PUPPETEER_EXECUTABLE_PATH');
       }
     }
+
+    console.log('Launching browser with args:', args);
+    console.log('Executable path:', executablePath);
 
     const browser = await puppeteer.launch({
       headless: true,
       args,
       executablePath,
-    });
-
-    const page = await browser.newPage();
-    await page.setViewport({ width: 794, height: 1123 }); // A4 size
-
-    // 生成简历 HTML
-    const html = generateTemplateHTML(template as TemplateId, resumeData);
-
-    // 使用 goto 方法加载 HTML，避免字符编码问题
-    const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
-    await page.goto(dataUrl, {
-      waitUntil: 'networkidle0',
       timeout: 30000,
     });
 
-    // 等待字体加载
-    await page.evaluateHandle('document.fonts.ready');
+    const page = await browser.newPage();
 
-    // 生成 PDF
-    const pdf = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20mm',
-        right: '15mm',
-        bottom: '20mm',
-        left: '15mm',
-      },
-    });
+    // 设置页面配置
+    await page.setViewport({ width: 794, height: 1123 }); // A4 size
+    page.setDefaultTimeout(30000);
+    page.setDefaultNavigationTimeout(30000);
 
-    await browser.close();
+    try {
+      // 生成简历 HTML
+      console.log('Generating HTML template...');
+      const html = generateTemplateHTML(template as TemplateId, resumeData);
+      console.log('HTML generated, length:', html.length);
 
-    // 返回 PDF
-    const filename = sanitizeFilename(resumeData.personalInfo.fullName || 'resume');
+      // 使用 goto 方法加载 HTML，避免字符编码问题
+      console.log('Loading HTML content...');
+      const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
+      await page.goto(dataUrl, {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
+      console.log('HTML content loaded successfully');
 
-    return new NextResponse(Buffer.from(pdf), {
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}.pdf"`,
-      },
-    });
+      // 等待字体加载
+      console.log('Waiting for fonts to load...');
+      await page.evaluateHandle('document.fonts.ready');
+      console.log('Fonts loaded');
+
+      // 生成 PDF
+      console.log('Generating PDF...');
+      const pdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '20mm',
+          right: '15mm',
+          bottom: '20mm',
+          left: '15mm',
+        },
+        timeout: 30000,
+      });
+      console.log('PDF generated successfully, size:', pdf.length);
+
+      await browser.close();
+      console.log('Browser closed');
+
+      // 返回 PDF
+      const filename = sanitizeFilename(resumeData.personalInfo.fullName || 'resume');
+
+      return new NextResponse(Buffer.from(pdf), {
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="${filename}.pdf"`,
+        },
+      });
+    } catch (error) {
+      console.error('Error during PDF generation:', error);
+      try {
+        await browser.close();
+      } catch (closeError) {
+        console.error('Error closing browser:', closeError);
+      }
+      throw error;
+    }
   } catch (error) {
     console.error('PDF generation error:', error);
     return NextResponse.json(

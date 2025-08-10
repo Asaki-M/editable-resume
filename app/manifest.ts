@@ -3,9 +3,9 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Next.js AI Starter',
-    short_name: 'Next App',
-    description: 'A starter template for Next.js with AI features',
+    name: '简历编辑器',
+    short_name: '简历编辑器',
+    description: '现代化的在线简历编辑器，支持多种模板、实时预览、PDF导出',
     start_url: '/',
     display: 'standalone',
     background_color: '#FFFFFF',
@@ -18,11 +18,6 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
       {
-        src: '/icons/icon-384x384.png',
-        sizes: '384x384',
-        type: 'image/png',
-      },
-      {
         src: '/icons/icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
@@ -30,29 +25,5 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     orientation: 'portrait',
     categories: ['productivity', 'utilities'],
-    screenshots: [
-      {
-        src: '/screenshots/mobile.png',
-        sizes: '540x720',
-        type: 'image/png',
-      },
-      {
-        src: '/screenshots/desktop.png',
-        sizes: '1280x800',
-        type: 'image/png',
-      },
-    ],
-    shortcuts: [
-      {
-        name: 'Dashboard',
-        url: '/dashboard',
-        icons: [{ src: '/icons/dashboard.png', sizes: '96x96' }],
-      },
-      {
-        name: 'Profile',
-        url: '/profile',
-        icons: [{ src: '/icons/profile.png', sizes: '96x96' }],
-      },
-    ],
   };
 }
