@@ -1,74 +1,124 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
-
 import { generateResumeHTML as generateTemplateHTML, TemplateId } from '~/lib/pdf-templates';
 import { sanitizeFilename } from '~/lib/pdf-templates/utils';
-import fs from 'fs';
+
+export const runtime = 'nodejs';
+
+// 定义最小化接口以避免引入不同包的类型冲突
+interface MinimalPage {
+  setViewport: (options: { width: number; height: number }) => Promise<void>;
+  setDefaultTimeout: (ms: number) => void;
+  setDefaultNavigationTimeout: (ms: number) => void;
+  goto: (url: string, options: { waitUntil: 'networkidle0' | 'networkidle2'; timeout: number }) => Promise<void>;
+  evaluateHandle: (expr: string) => Promise<unknown>;
+  pdf: (options: { format: 'A4' | string; printBackground: boolean; margin: { top: string; right: string; bottom: string; left: string }; timeout: number }) => Promise<Buffer>;
+}
+
+interface MinimalBrowser {
+  newPage: () => Promise<MinimalPage>;
+  close: () => Promise<void>;
+}
+
+type LaunchOptions = {
+  headless?: boolean;
+  args?: string[];
+  executablePath?: string;
+  timeout?: number;
+};
+
+type PuppeteerLike = {
+  launch: (options?: LaunchOptions) => Promise<unknown>;
+};
 
 export async function POST(request: NextRequest) {
   try {
-    const { resumeData, template = 'modern' } = await request.json();
-    console.log('PDF export request received for:', resumeData.personalInfo.fullName || 'Unknown User');
-    console.log('Using template:', template);
+    const { resumeData, template = 'minimal' } = await request.json();
 
-    // 启动无头浏览器 - 统一使用生产环境配置
-    let executablePath;
-    let args;
+    // 依据环境动态选择 puppeteer 与 chromium
+    const isVercel = Boolean(process.env.VERCEL || process.env.VERCEL_ENV);
 
-    // 首先尝试本地 Chrome（开发环境）
-    const possiblePaths = [
-      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-      '/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing',
-      '/usr/bin/google-chrome',
-      '/usr/bin/chromium-browser',
-    ];
+    let puppeteer: PuppeteerLike;
+    let executablePath: string | undefined;
+    let args: string[] = [];
+    let headless = true;
 
-    executablePath = possiblePaths.find((path) => {
-      try {
-        return fs.existsSync(path);
-      } catch {
-        return false;
-      }
-    });
-
-    if (executablePath) {
-      console.log('Using local Chrome:', executablePath);
-      args = ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--disable-web-security'];
+    if (isVercel) {
+      const chromium = (await import('@sparticuz/chromium')).default;
+      const { launch } = await import('puppeteer-core');
+      puppeteer = { launch };
+      executablePath = await chromium.executablePath();
+      args = chromium.args;
+      headless = true;
     } else {
-      // 如果本地 Chrome 不可用，尝试使用 chromium（生产环境）
-      try {
-        executablePath = await chromium.executablePath();
-        args = [
-          ...chromium.args,
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu',
-          '--single-process',
-          '--no-zygote',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor',
-          '--disable-background-timer-throttling',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-renderer-backgrounding',
-        ];
-        console.log('Using chromium executable for production');
-      } catch (error) {
-        console.error('Chromium setup error:', error);
-        throw new Error('No Chrome executable found. Please install Chrome or set PUPPETEER_EXECUTABLE_PATH');
+      const p = await import('puppeteer');
+      puppeteer = { launch: p.launch } as PuppeteerLike;
+
+      // 1) 优先使用自定义环境变量
+      const envLocalChrome = process.env.localChromeExecutablepath;
+      if (envLocalChrome && typeof envLocalChrome === 'string' && envLocalChrome.trim().length > 0) {
+        executablePath = envLocalChrome;
+        console.log('Using custom Chrome path:', executablePath);
       }
+
+      // 2) 尝试常见的系统 Chrome 路径
+      if (!executablePath) {
+        const { existsSync } = await import('fs');
+        const commonPaths =
+          process.platform === 'win32'
+            ? ['C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe']
+            : process.platform === 'darwin'
+              ? ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome']
+              : ['/usr/bin/google-chrome', '/usr/bin/chromium-browser', '/snap/bin/chromium'];
+
+        for (const path of commonPaths) {
+          if (existsSync(path)) {
+            executablePath = path;
+            console.log('Found system Chrome at:', executablePath);
+            break;
+          }
+        }
+      }
+
+      // 3) 最后尝试 Puppeteer 自带的 Chromium
+      if (!executablePath) {
+        try {
+          // 不指定 executablePath，让 Puppeteer 使用默认的
+          console.log('Using Puppeteer bundled Chromium');
+        } catch (error) {
+          console.log('Failed to find Puppeteer Chromium:', error);
+        }
+      }
+
+      // 开发环境稳定参数（Windows 友好）
+      args = [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+      ];
+      headless = true;
     }
 
-    console.log('Launching browser with args:', args);
-    console.log('Executable path:', executablePath);
+    console.log('Launching browser with config:', {
+      headless,
+      executablePath: executablePath || 'default',
+      argsCount: args.length,
+      isVercel,
+    });
 
-    const browser = await puppeteer.launch({
-      headless: true,
+    const browser = (await puppeteer.launch({
+      headless,
       args,
       executablePath,
       timeout: 30000,
-    });
+    })) as unknown as MinimalBrowser;
+
+    console.log('Browser launched successfully');
 
     const page = await browser.newPage();
 
@@ -79,26 +129,18 @@ export async function POST(request: NextRequest) {
 
     try {
       // 生成简历 HTML
-      console.log('Generating HTML template...');
       const html = generateTemplateHTML(template as TemplateId, resumeData);
-      console.log('HTML generated, length:', html.length);
-
       // 使用 goto 方法加载 HTML，避免字符编码问题
-      console.log('Loading HTML content...');
       const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
       await page.goto(dataUrl, {
         waitUntil: 'networkidle0',
         timeout: 30000,
       });
-      console.log('HTML content loaded successfully');
 
       // 等待字体加载
-      console.log('Waiting for fonts to load...');
       await page.evaluateHandle('document.fonts.ready');
-      console.log('Fonts loaded');
 
       // 生成 PDF
-      console.log('Generating PDF...');
       const pdf = await page.pdf({
         format: 'A4',
         printBackground: true,
@@ -110,10 +152,8 @@ export async function POST(request: NextRequest) {
         },
         timeout: 30000,
       });
-      console.log('PDF generated successfully, size:', pdf.length);
 
       await browser.close();
-      console.log('Browser closed');
 
       // 返回 PDF
       const filename = sanitizeFilename(resumeData.personalInfo.fullName || 'resume');

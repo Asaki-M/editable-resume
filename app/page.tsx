@@ -22,7 +22,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ resumeData: data, template: 'minimal' }),
       });
 
       if (!response.ok) {
@@ -46,7 +46,6 @@ export default function Home() {
       // 清理
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-
     } catch (error) {
       console.error('Export error:', error);
       throw error;
@@ -69,11 +68,5 @@ export default function Home() {
     }
   });
 
-  return (
-    <ResumeEditor
-      initialData={resumeData}
-      onSave={handleSave}
-      onExportPDF={handleExportPDF}
-    />
-  );
+  return <ResumeEditor initialData={resumeData} onSave={handleSave} onExportPDF={handleExportPDF} />;
 }

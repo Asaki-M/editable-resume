@@ -14,6 +14,8 @@ const withSerwist = withSerwistInit({
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
+  // externalize chromium and puppeteer-core in server runtime
+  serverExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
   // experimental features
   experimental: {
     // enable progressive page rendering (PPR) - requires canary version
