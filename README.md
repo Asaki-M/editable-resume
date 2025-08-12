@@ -10,7 +10,7 @@
 
 **一个现代化的在线简历编辑器，支持多种模板、实时预览、PDF导出**
 
-[在线体验](https://editable-resume.vercel.app) · [功能演示](#功能演示) · [快速开始](#快速开始) · [部署指南](#部署指南)
+[在线体验](https://editable-resume.vercel.app)
 
 </div>
 
